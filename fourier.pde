@@ -4,7 +4,7 @@ void setup() {
   size(600,600);
 //  colorMode(HSB,360);
   background(360);
-  //noLoop();
+//  noLoop();
   frameRate(60);
   println("YO MAN");
 }
@@ -21,6 +21,13 @@ void setup() {
 
 void draw() {
   background(360);
+  HashMap coeff = new HashMap();
+  coeff.put(-1, 1);
+  coeff.put(1, 1);
+  coeff.put(2, 1*((frameCount%50)/50.0));
+  coeff.put(3, 1);
+  int N = 3;
+  /*
   float[] coeff = new float[3];
   coeff[0] = 1;
   coeff[1] = 1;
@@ -29,10 +36,11 @@ void draw() {
   //coeff[3] = 0.5*((frameCount%134)/134.0);
   //coeff[4] = 0.25*((frameCount%79)/79.0);
   //coeff[5] = 1;
-  for (int n = 0; n<360; n++) {
+  */
+  for (int n = 0; n<360*8; n++) {
     float angle_in_fraction = n/360.0;
-    for (int z = 0; z < 4; z++) {
-    Complex c = dft_calc(angle_in_fraction, coeff);
+    for (int z = 0; z < 1; z++) {
+    Complex c = dft_calc(angle_in_fraction, coeff, N);
     //println("angle = "+n+" real = "+c.real+ " img = "+c.img);
 
     //stroke(0,0,360);
@@ -51,17 +59,21 @@ void draw() {
   }
 }
 
-Complex dft_calc(float angle_in_fraction, float[] coeff) {
+Complex dft_calc(float angle_in_fraction, float[] coeff, int N) {
   float real = 0;
   float comp = 0;
   Complex i = new Complex(0, 1);
 
   Complex sum = new Complex(0, 0);
 
-  for (int k = 0; k < coeff.length; k++) {
-    float Xk = coeff[k];
+  Iterator iter = coeff.entrySet().iterator();
+
+  while (iter.hasNext()) {
+    Map.Entry me = (Map.Entry)iter.next();
+    float k = me.getKey();
+    float Xk = me.getValue();
     if (Xk == 0) continue;
-    float arg = TWO_PI * k * angle_in_fraction / coeff.length;
+    float arg = TWO_PI * k * angle_in_fraction / N;
     sum.addReal(Xk * cos(arg));
     //println("@"+sum.real);
     sum.add(i.multi(new Complex(Xk * sin(arg),0)));
