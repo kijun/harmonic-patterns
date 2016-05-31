@@ -5,7 +5,7 @@ void setup() {
 //  colorMode(HSB,360);
   background(360);
 //  noLoop();
-  frameRate(60);
+  frameRate(30);
   println("YO MAN");
 }
 
@@ -23,8 +23,6 @@ void draw() {
   background(360);
   HashMap coeff = new HashMap();
   coeff.put(-1, 1);
-  coeff.put(1, 1);
-  coeff.put(2, 1*((frameCount%50)/50.0));
   coeff.put(3, 1);
   int N = 3;
   /*
@@ -37,15 +35,22 @@ void draw() {
   //coeff[4] = 0.25*((frameCount%79)/79.0);
   //coeff[5] = 1;
   */
-  for (int n = 0; n<360*8; n++) {
+  for (int n = 0; n<360; n++) {
     float angle_in_fraction = n/360.0;
     for (int z = 0; z < 1; z++) {
     Complex c = dft_calc(angle_in_fraction, coeff, N);
     //println("angle = "+n+" real = "+c.real+ " img = "+c.img);
 
     //stroke(0,0,360);
-    point(centerX+c.real*150,
-          centerY+c.img*150);
+    ellipse(centerX+300*cos((c.real+frameCount/360.0)*TWO_PI),
+            centerY+300*sin((c.img+frameCount/360.0)*TWO_PI),
+            3,3
+            );
+
+/*
+    point(centerX+150*cos((c.real+frameCount/360.0)*TWO_PI),
+          centerY+150*sin((c.img+frameCount/360.0)*TWO_PI));
+          */
           /*
     150*cos(TWO_PI*angle_in_fraction) * (abs(c.real+c.img)),
           centerY+150*sin(TWO_PI*angle_in_fraction) * (abs(c.real+c.img)));
