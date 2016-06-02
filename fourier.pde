@@ -3,7 +3,7 @@ int centerY = 300;
 void setup() {
   size(600,600);
 //  colorMode(HSB,360);
-  background(360);
+  background(0);
 //  noLoop();
 //  frameRate(300);
   println("YO MAN");
@@ -20,24 +20,21 @@ void setup() {
 */
 
 void draw() {
-  background(360);
+  //background(0);
+  stroke(360);
   HashMap coeff = new HashMap();
-  //coeff.put(-1, 1);
-  coeff.put(1, Complex.FromDegrees(frameCount/2.0).multi2(0.3));
-  coeff.put(2, Complex.FromDegrees(frameCount));
+
+  int steps = 100;
+  float x = steps - abs(frameCount % (2*steps) - steps);
+  x = x/steps;
+  coeff.put(1, Complex.FromDegrees(frameCount/2.0).multi2(-x));
+  coeff.put(2, Complex.FromDegrees(x*360).multi2(x));
   coeff.put(3, Complex.FromDegrees(frameCount*5.0));
-  int N = 360;
-  /*
-  float[] coeff = new float[3];
-  coeff[0] = 1;
-  coeff[1] = 1;
-  //coeff[1] = 1*((frameCount%150)/250.0);
-  coeff[2] = 1*((frameCount)/50.0);
-  //coeff[3] = 0.5*((frameCount%134)/134.0);
-  //coeff[4] = 0.25*((frameCount%79)/79.0);
-  //coeff[5] = 1;
-  */
-  for (int n = 0; n<360; n++) {
+  coeff.put(4, Complex.FromDegrees(frameCount*5.0).multi2(1));
+
+  int N = 720;
+
+  for (int n = 0; n<N; n++) {
     //float angle_in_fraction = n/360.0;
     for (int z = 0; z < 1; z++) {
     Complex c = dft_calc(n, coeff, N);
@@ -51,8 +48,8 @@ void draw() {
             );
             */
 
-    ellipse(centerX+100*c.real,
-          centerY+100*c.img, 3, 3);
+    ellipse(centerX+500*c.real,
+          centerY+500*c.img, 3, 3);
           /*
     150*cos(TWO_PI*angle_in_fraction) * (abs(c.real+c.img)),
           centerY+150*sin(TWO_PI*angle_in_fraction) * (abs(c.real+c.img)));
