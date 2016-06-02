@@ -1,11 +1,32 @@
+class Character {
+  float x;
+  float y;
+  float speed;
+
+  public Character(float x, float y, float speed) {
+    this.x = x;
+    this.y = y;
+    this.speed = speed;
+  }
+
+  public void MoveToward(float xdir, float ydir) {
+    float magnitude = sqrt(xdir*xdir+ydir*ydir);
+    this.x += xdir / magnitude * speed;
+    this.y += ydir / magnitude * speed;
+  }
+}
+
 int centerX = 300;
 int centerY = 300;
+Character mainCharacter = new Character(centerX, centerY, 3);
+
 void setup() {
   size(600,600);
 //  colorMode(HSB,360);
   background(0);
 //  noLoop();
-  frameRate(20);
+  frameRate(60);
+
 }
 
 /*
@@ -19,35 +40,67 @@ void setup() {
 */
 
 void draw() {
-  stroke(360);
   background(0);
+  stroke(360, 360, 360);
+  fill(360, 360, 360);
+
   HashMap coeff = new HashMap();
 
-  int steps = 100;
+  int steps = 1000;
   float x = steps - abs(frameCount % (2*steps) - steps);
   x = x/steps;
 
   HashMap coeff2 = new HashMap();
-  coeff2.put(10, Complex.FromDegrees(frameCount));
-  coeff2.put(25, Complex.FromDegrees(-frameCount).multi2(1-x));
-  coeff2.put(3, Complex.FromDegrees(frameCount*2.573));
+  coeff2.put(2, Complex.FromDegrees(frameCount/120));
+  coeff2.put(4, Complex.FromDegrees(x*360));
+  coeff2.put(6, Complex.FromDegrees(frameCount/120).multi2(0.5));
+  //coeff2.put(7, Complex.FromDegrees(frameCount/20));
 
-  draw2(coeff2, 30, 50, 5);
+  drawPattern(coeff2, 100, 150, 5);
+
+  keyPPressed();
+  drawCharacter();
 }
 
-void draw2(HashMap coeff, int N, float scale, float dot_size) {
+void keyPPressed() {
+  if (!keyPressed) return;
+  float xdir = 0;
+  float ydir = 0;
+  if (key == CODED) {
+    if (keyCode == UP) {
+      ydir = -1;
+    }
+    if (keyCode == DOWN) {
+      ydir = 1;
+    }
+    if (keyCode == RIGHT) {
+      xdir = 1;
+    }
+    if (keyCode == LEFT) {
+      xdir = -1;
+    }
+  }
+  if (xdir != 0 || ydir != 0) {
+    mainCharacter.MoveToward(xdir, ydir);
+  }
+}
+
+void drawCharacter() {
+  stroke(213, 85, 47);
+  fill(213, 85, 47);
+  ellipse(mainCharacter.x, mainCharacter.y, 4, 4);
+}
+
+void drawPattern(HashMap coeff, int N, float scale, float dot_size) {
   //int N = 360;
   for (int n = 0; n<N; n++) {
     //float angle_in_fraction = n/360.0;
-    for (int z = 3; z < 4; z++) {
+    for (int z = 0; z < 1; z++) {
       Complex c = dft_calc(n, coeff, N);
-
 
       float x = centerX + scale*c.real*(z+1);
       float y = centerY + scale*c.img*(z+1);
       ellipse(x, y, dot_size, dot_size);
-      //stroke(360);
-
     }
   }
 }
