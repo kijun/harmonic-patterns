@@ -51,18 +51,27 @@ void draw() {
   x = x/steps;
 
   HashMap coeff2 = new HashMap();
-  coeff2.put(2, Complex.FromDegrees(frameCount/120));
-  coeff2.put(4, Complex.FromDegrees(x*360));
-  coeff2.put(6, Complex.FromDegrees(frameCount/120).multi2(0.5));
-  //coeff2.put(7, Complex.FromDegrees(frameCount/20));
+  coeff2.put(1, Complex.FromDegrees(frameCount/2));
+  //coeff2.put(-1, Complex.FromDegrees(frameCount/120).multi(1/sq(x)));
+  coeff2.put(2, Complex.FromDegrees(frameCount/4));
+  //coeff2.put(4, Complex.FromDegrees(x*360));
+  //coeff2.put(6, Complex.FromDegrees(frameCount/120).multi2(0.5+x));
+  //coeff2.put(7, Complex.FromDegrees(-frameCount/8));
+
+  Complex[] samps = genSamples(coeff2, 150);
+  float scale = 200;
+  for (int i=0;i<150;i++) {
+    Complex c = samps[i];
+    ellipse(c.magnitude()*scale+100, i*4, c.img*40, 1);
+  }
 
   drawPattern(coeff2, 100, 150, 5);
 
-  keyPPressed();
+  moveCharacter();
   drawCharacter();
 }
 
-void keyPPressed() {
+void moveCharacter() {
   if (!keyPressed) return;
   float xdir = 0;
   float ydir = 0;
@@ -89,6 +98,16 @@ void drawCharacter() {
   stroke(213, 85, 47);
   fill(213, 85, 47);
   ellipse(mainCharacter.x, mainCharacter.y, 4, 4);
+}
+
+Complex[] genSamples(HashMap coeff, int N) {
+  Complex[] data = new Complex[N];
+
+  for (int n = 0; n<N; n++) {
+    data[n] = dft_calc(n, coeff, N);
+  }
+
+  return data;
 }
 
 void drawPattern(HashMap coeff, int N, float scale, float dot_size) {
