@@ -5,7 +5,7 @@ void setup() {
 //  colorMode(HSB,360);
   background(360);
 //  noLoop();
-  frameRate(30);
+//  frameRate(300);
   println("YO MAN");
 }
 
@@ -22,9 +22,10 @@ void setup() {
 void draw() {
   background(360);
   HashMap coeff = new HashMap();
-  coeff.put(-1, 1);
-  coeff.put(3, 1);
-  int N = 3;
+  //coeff.put(-1, 1);
+  coeff.put(1, new Complex(0,1));
+  coeff.put(2, (new Complex(-1,frameCount)).normalize());
+  int N = 360;
   /*
   float[] coeff = new float[3];
   coeff[0] = 1;
@@ -36,21 +37,21 @@ void draw() {
   //coeff[5] = 1;
   */
   for (int n = 0; n<360; n++) {
-    float angle_in_fraction = n/360.0;
+    //float angle_in_fraction = n/360.0;
     for (int z = 0; z < 1; z++) {
-    Complex c = dft_calc(angle_in_fraction, coeff, N);
+    Complex c = dft_calc(n, coeff, N);
     //println("angle = "+n+" real = "+c.real+ " img = "+c.img);
 
     //stroke(0,0,360);
-    ellipse(centerX+300*cos((c.real+frameCount/360.0)*TWO_PI),
+    /*
+    ellipse(centerX+300*cos((c.real+frameCount/7200.0)*TWO_PI),
             centerY+300*sin((c.img+frameCount/360.0)*TWO_PI),
             3,3
             );
+            */
 
-/*
-    point(centerX+150*cos((c.real+frameCount/360.0)*TWO_PI),
-          centerY+150*sin((c.img+frameCount/360.0)*TWO_PI));
-          */
+    ellipse(centerX+150*c.real,
+          centerY+150*c.img, 3, 3);
           /*
     150*cos(TWO_PI*angle_in_fraction) * (abs(c.real+c.img)),
           centerY+150*sin(TWO_PI*angle_in_fraction) * (abs(c.real+c.img)));
@@ -64,7 +65,7 @@ void draw() {
   }
 }
 
-Complex dft_calc(float angle_in_fraction, float[] coeff, int N) {
+Complex dft_calc(int n, HashMap coeff, int N) {
   float real = 0;
   float comp = 0;
   Complex i = new Complex(0, 1);
@@ -76,12 +77,14 @@ Complex dft_calc(float angle_in_fraction, float[] coeff, int N) {
   while (iter.hasNext()) {
     Map.Entry me = (Map.Entry)iter.next();
     float k = me.getKey();
-    float Xk = me.getValue();
-    if (Xk == 0) continue;
-    float arg = TWO_PI * k * angle_in_fraction / N;
-    sum.addReal(Xk * cos(arg));
+    Complex Xk = me.getValue();
+    //if (Xk == 0) continue;
+    float arg = TWO_PI * k * n / N;
+
+    sum.add(Xk.multi(new Complex(cos(arg),0)));
+    sum.add(Xk.multi(new Complex(0, sin(arg))));
     //println("@"+sum.real);
-    sum.add(i.multi(new Complex(Xk * sin(arg),0)));
+    //sum.add(i.multi(new Complex(Xk * sin(arg),0)));
   }
   //println(sum.real);
   //println(sum.img);
@@ -103,6 +106,10 @@ class Complex {
         return new Complex(real, img);
     }
 
+    public float magnitude() {
+      return sqrt(real*real+img*img);
+    }
+
     public void add(Complex b) {
         this.real += b.real;
         this.img += b.img;
@@ -110,5 +117,10 @@ class Complex {
 
     public void addReal(double real) {
         this.real += real;
+    }
+
+    public Complex normalize() {
+      float mag = magnitude();
+      return new Complex(real/mag, img/mag);
     }
 }
