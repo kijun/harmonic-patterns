@@ -23,8 +23,9 @@ void draw() {
   background(360);
   HashMap coeff = new HashMap();
   //coeff.put(-1, 1);
-  coeff.put(1, new Complex(0,1));
-  coeff.put(2, (new Complex(-1,frameCount)).normalize());
+  coeff.put(1, Complex.FromDegrees(frameCount/2.0).multi2(0.3));
+  coeff.put(2, Complex.FromDegrees(frameCount));
+  coeff.put(3, Complex.FromDegrees(frameCount*5.0));
   int N = 360;
   /*
   float[] coeff = new float[3];
@@ -50,8 +51,8 @@ void draw() {
             );
             */
 
-    ellipse(centerX+150*c.real,
-          centerY+150*c.img, 3, 3);
+    ellipse(centerX+100*c.real,
+          centerY+100*c.img, 3, 3);
           /*
     150*cos(TWO_PI*angle_in_fraction) * (abs(c.real+c.img)),
           centerY+150*sin(TWO_PI*angle_in_fraction) * (abs(c.real+c.img)));
@@ -100,6 +101,14 @@ class Complex {
         this.img = img;
     }
 
+    public static Complex FromDegrees(float angleInDeg) {
+      return Complex.FromRadian(TWO_PI * angleInDeg / 360);
+    }
+
+    public static Complex FromRadian(float radian) {
+      return new Complex(cos(radian), sin(radian));
+    }
+
     public Complex multi(Complex b) {
         double real = this.real * b.real - this.img * b.img;
         double img = this.real * b.img + this.img * b.real;
@@ -122,5 +131,9 @@ class Complex {
     public Complex normalize() {
       float mag = magnitude();
       return new Complex(real/mag, img/mag);
+    }
+
+    public Complex multi2(float scale) {
+      return new Complex(scale*real, scale*img);
     }
 }
