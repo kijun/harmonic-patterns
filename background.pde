@@ -11,19 +11,22 @@ class Character {
 
   public void MoveToward(float xdir, float ydir) {
     float magnitude = sqrt(xdir*xdir+ydir*ydir);
+    if (magnitude < 7) return;
     this.x += xdir / magnitude * speed;
     this.y += ydir / magnitude * speed;
   }
 }
 
-float width = 600;
+float width = screen.width;
+float height = screen.height;
 float centerX = width/2;
-float centerY = width/2;
-int defaultFrameRate = 30;
-Character mainCharacter = new Character(centerX, centerY, 3);
+float centerY = height/2;
+int defaultFrameRate = 60;
+Character mainCharacter = new Character(centerX, centerY, width/defaultFrameRate/2);
 
 void setup() {
-  size(width,width);
+  size(width, height);
+  //size(width,width);
 //  colorMode(HSB,360);
   background(0);
 //  noLoop();
@@ -32,21 +35,23 @@ void setup() {
 }
 
 void draw() {
-  drawBackground();
+  // drawStructure();
+  background(0);
+  //drawBackground();
+  drawSolitaire();
   moveCharacter();
   drawCharacter();
-  drawSolitaire();
 }
 
 void drawBackground() {
-  background(0);
-  stroke(360, 360, 360);
-  fill(360, 360, 360);
+  int color = 20;
+  stroke(color, color, color);
+  fill(color, color, color);
 
   // [params]
   int dotCount = 8;
-  float moveForSec = 1.3;
-  float pauseForSec = 0.6;
+  float moveForSec = 0.8;
+  float pauseForSec = 0.2;
 
   // [calc]
   float framesToMove = defaultFrameRate * moveForSec;
@@ -63,8 +68,10 @@ void drawBackground() {
   if (index < framesToMove) {
     if ((int)(frameCount / (framesToMove+framesToPause)) % 2 == 0) {
       xdisp = dispPerFrame * index;
-      ydisp = dispPerFrame * index;
+      //ydisp = dispPerFrame * index;
     } else {
+      //xdisp = dispPerFrame * index;
+      //ydisp = dispPerFrame * index;
       xdisp = dispPerFrame * index * -1;
     }
   }
@@ -73,7 +80,7 @@ void drawBackground() {
     for (int j=-1; j<dotCount+1; j++) {
       float xpos = xdisp + i*width/(float)dotCount;
       float ypos = ydisp + j*width/(float)dotCount;
-      ellipse(xpos, ypos, 1, 20);
+      ellipse(xpos, ypos, 10, 10);
     }
   }
 }
@@ -82,26 +89,32 @@ void drawSolitaire() {
   stroke(360, 360, 360);
   fill(360, 360, 360);
 
-  HashMap coeff = new HashMap();
 
   int steps = 1000;
   float x = steps - abs(frameCount % (2*steps) - steps);
   x = x/steps;
 
+  /* background */
   HashMap coeff2 = new HashMap();
-  coeff2.put(1, Complex.FromDegrees(frameCount*2));
-  coeff2.put(2, Complex.FromDegrees(frameCount));
+  float baseSpeed = frameCount/8;
+  coeff2.put(1, Complex.FromDegrees(baseSpeed));
+  coeff2.put(-2, Complex.FromDegrees(-baseSpeed));
+  coeff2.put(3, Complex.FromDegrees(-baseSpeed));
 
-  Complex[] samps = genSamples(coeff2, 150);
-  float scale = 150;
-  for (int i=0;i<150;i++) {
-    Complex c = samps[i];
-    ellipse(c.magnitude()*scale+100, i*4, c.img*40, 1);
-  }
+  Complex[] samps = genSamples(coeff2, 200);
+  drawEllipses(samps, 1000, 40);
+  /* hashmap */
+  HashMap c2 = new HashMap();
+  baseSpeed /= 2;
+  c2.put(1, Complex.FromDegrees(baseSpeed));
+  c2.put(3, Complex.FromDegrees(-baseSpeed));
+  drawEllipses(genSamples(c2, 100), 1000, 20);
+}
 
-  for (int i=0;i<150;i++) {
-    Complex c = samps[i];
-    ellipse(c.img*scale+300, i*4, 1, c.magnitude()*40, 1);
+void drawEllipses(Complex[] samples, float scale, float diameter) {
+  for (int i=0;i<samples.length;i++) {
+    Complex c = samples[i];
+    ellipse(centerX + scale*c.real, centerY+scale*c.img, diameter, diameter);
   }
 }
 
@@ -126,6 +139,12 @@ void moveCharacter() {
   if (xdir != 0 || ydir != 0) {
     mainCharacter.MoveToward(xdir, ydir);
   }
+}
+
+void moveCharacter() {
+  xpos = mouseX;
+  ypos = mouseY;
+  mainCharacter.MoveToward(xpos-mainCharacter.x, ypos - mainCharacter.y);
 }
 
 void drawCharacter() {
