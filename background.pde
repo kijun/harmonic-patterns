@@ -16,31 +16,69 @@ class Character {
   }
 }
 
-int centerX = 300;
-int centerY = 300;
+float width = 600;
+float centerX = width/2;
+float centerY = width/2;
+int defaultFrameRate = 30;
 Character mainCharacter = new Character(centerX, centerY, 3);
 
 void setup() {
-  size(600,600);
+  size(width,width);
 //  colorMode(HSB,360);
   background(0);
 //  noLoop();
-  frameRate(60);
+  frameRate(defaultFrameRate);
 
 }
-
-/*
-void setup() {
-  size(200, 200);
-  background(100);
-  stroke(255);
-  ellipse(50, 50, 25, 25);
-  println("hello web!");
-}
-*/
 
 void draw() {
+  drawBackground();
+  moveCharacter();
+  drawCharacter();
+  drawSolitaire();
+}
+
+void drawBackground() {
   background(0);
+  stroke(360, 360, 360);
+  fill(360, 360, 360);
+
+  // [params]
+  int dotCount = 8;
+  float moveForSec = 1.3;
+  float pauseForSec = 0.6;
+
+  // [calc]
+  float framesToMove = defaultFrameRate * moveForSec;
+  float framesToPause = defaultFrameRate * pauseForSec;
+
+  float xdisp = 0;
+  float ydisp = 0;
+
+  float dispPerFrame = (width/(int)dotCount)/framesToMove;
+  bool sign = true;
+
+  int index = frameCount % (framesToMove+framesToPause);
+  println(framesToMove+framesToPause + " " + index);
+  if (index < framesToMove) {
+    if ((int)(frameCount / (framesToMove+framesToPause)) % 2 == 0) {
+      xdisp = dispPerFrame * index;
+      ydisp = dispPerFrame * index;
+    } else {
+      xdisp = dispPerFrame * index * -1;
+    }
+  }
+
+  for (int i=-1; i<dotCount+1; i++) {
+    for (int j=-1; j<dotCount+1; j++) {
+      float xpos = xdisp + i*width/(float)dotCount;
+      float ypos = ydisp + j*width/(float)dotCount;
+      ellipse(xpos, ypos, 1, 20);
+    }
+  }
+}
+
+void drawSolitaire() {
   stroke(360, 360, 360);
   fill(360, 360, 360);
 
@@ -51,13 +89,8 @@ void draw() {
   x = x/steps;
 
   HashMap coeff2 = new HashMap();
-  coeff2.put(1, Complex.FromDegrees(frameCount/2));
-  //coeff2.put(-1, Complex.FromDegrees(frameCount/120).multi(1/sq(x)));
-  coeff2.put(2, Complex.FromDegrees(frameCount/4));
-  //coeff2.put(-1, Complex.FromDegrees(frameCount/4));
-  //coeff2.put(4, Complex.FromDegrees(x*360));
-  //coeff2.put(6, Complex.FromDegrees(frameCount/120).multi2(0.5+x));
-  //coeff2.put(7, Complex.FromDegrees(-frameCount/8));
+  coeff2.put(1, Complex.FromDegrees(frameCount*2));
+  coeff2.put(2, Complex.FromDegrees(frameCount));
 
   Complex[] samps = genSamples(coeff2, 150);
   float scale = 150;
@@ -70,10 +103,6 @@ void draw() {
     Complex c = samps[i];
     ellipse(c.img*scale+300, i*4, 1, c.magnitude()*40, 1);
   }
-  //drawPattern(coeff2, 100, 150, 5);
-
-  moveCharacter();
-  drawCharacter();
 }
 
 void moveCharacter() {
@@ -102,7 +131,7 @@ void moveCharacter() {
 void drawCharacter() {
   stroke(213, 85, 47);
   fill(213, 85, 47);
-  ellipse(mainCharacter.x, mainCharacter.y, 4, 4);
+  ellipse(mainCharacter.x, mainCharacter.y, 10, 10);
 }
 
 Complex[] genSamples(HashMap coeff, int N) {
