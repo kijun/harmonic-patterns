@@ -11,13 +11,13 @@ class Character {
 
   public void MoveToward(float xdir, float ydir) {
     float magnitude = sqrt(xdir*xdir+ydir*ydir);
-    if (magnitude < 7) return;
+    //if (magnitude < 7) return;
     this.x += xdir / magnitude * speed;
     this.y += ydir / magnitude * speed;
   }
 }
 
-float width = screen.width;
+float width = screen.width/2;
 float height = screen.height;
 //float width = 1000;
 //float height = 500;
@@ -41,7 +41,7 @@ void draw() {
   //background(255);
   background(0);
   //drawBackground();
-  drawBackground2();
+  //drawBackground2();
   drawSolitaire();
   moveCharacter();
   drawCharacter();
@@ -53,11 +53,16 @@ void drawBackground2() {
   int steps = 500;
   float x = steps - abs(frameCount % (2*steps) - steps);
   x = x/steps;
-  ellipse(centerX, centerY, 200*(2-x), 200*(2-x));
-  ellipse(centerX+100*(1-x), centerY-100*(1-x), 100*(2-x), 100*(2-x));
+  //ellipse(centerX+300*(x-0.5), centerY, 200*(2-x), 200*(2-x));
+  ellipse(centerX+300*(x-0.5), centerY, 200, 200);
+
+  //ellipse(centerX+400, centerY-300, 100*(2-x), 100*(2-x));
+  //ellipse(centerX-500, centerY+100, 100, 100);
+
+  //ellipse(centerX+100*(1-x), centerY-100*(1-x), 100*(2-x), 100*(2-x));
   //ellipse(centerX-100*(1-x), centerY-100*(1-x), 200*(2-x), 200*(2-x));
   //ellipse(centerX+100*(1-x), centerY+100*(1-x), 200*(2-x), 200*(2-x));
-  ellipse(centerX-100*(1-x), centerY+100*(1-x), 200*(2-x), 200*(2-x));
+  //ellipse(centerX-100*(1-x), centerY+100*(1-x), 200*(2-x), 200*(2-x));
   //ellipse(centerX+100, centerY-100, 400, 400);
 }
 
@@ -107,27 +112,53 @@ void drawSolitaire() {
   stroke(255);
   fill(255);
 
-
   int steps = 250;
   float x = steps - abs(frameCount % (2*steps) - steps);
   x = x/steps;
   //x = (frameCount % steps)/steps;
 
   /* background */
+  // from 1s to 10s
   HashMap coeff2 = new HashMap();
   float baseSpeed = frameCount/8;
-  coeff2.put(1, Complex.FromDegrees(baseSpeed*0.5));
-  coeff2.put(-2, Complex.FromDegrees(-baseSpeed*0.5));
-  coeff2.put(3, Complex.FromDegrees(-baseSpeed*0.5));
+  float sec = millis()/1000;
 
+  float s1 = 0;
+  float s2 = 70;
+  float p1 = (sec - s1)/(s2-s1);
+  float minFactor = 0.3;
+  float maxFactor = 0.6;
+  float currFactor = ((maxFactor-minFactor)/(s2-s1)) * (millis()/1000.0-1)+minFactor;
+
+  // 0s = 0.1
+  // 5s = 0.6
+  // 10s = 0.1
+  coeff2.put(1, Complex.FromDegrees(baseSpeed*currFactor));
+  coeff2.put(-2, Complex.FromDegrees(-baseSpeed*currFactor));
+  coeff2.put(3, Complex.FromDegrees(-baseSpeed*currFactor));
+  //coeff2.put(3, Complex.FromDegrees(-baseSpeed*0.5));
+
+  if (sec > s1 && sec < s2) {
   Complex[] samps = genSamples(coeff2, 200);
-  drawEllipses(samps, 1000, 40);
+  drawEllipses(samps, 1000, 40, 0, height*3*p1-height/2);
+  }
+
   /* hashmap */
+  float ss1 = 5;
+  float ss2 = 40;
+  float progress = (sec - ss1)/(ss2-ss1);
+
+  if (sec < ss1 || sec > ss2) return;
+
   HashMap c2 = new HashMap();
   baseSpeed /= 2;
   c2.put(2, Complex.FromDegrees(-baseSpeed*1));
-  c2.put(3, Complex.FromDegrees(baseSpeed*1.5).multi2(1));
-  drawEllipses(genSamples(c2, 70), 1000, 5);
+  c2.put(3, Complex.FromDegrees(baseSpeed*1.5).multi2(1+progress));
+  stroke(255*progress);
+  fill(255*progress);
+  drawEllipses(genSamples(c2, 130), 300*(progress+0.3), 5, 0, height * 2.5* progress - height);
+
+  //drawEllipses(genSamples(c2, 70), 1000, 5);
   return;
 
 /*
@@ -154,10 +185,10 @@ void drawSolitaire() {
   drawEllipses(genSamples(c6, 40), 500, 5);
 }
 
-void drawEllipses(Complex[] samples, float scale, float diameter) {
+void drawEllipses(Complex[] samples, float scale, float diameter, float dx, float dy) {
   for (int i=0;i<samples.length;i++) {
     Complex c = samples[i];
-    ellipse(centerX + scale*c.real, centerY+scale*c.img, diameter, diameter);
+    ellipse(centerX + scale*c.real + dx, centerY+scale*c.img + dy, diameter, diameter);
   }
 }
 
@@ -184,7 +215,7 @@ void moveCharacter() {
   }
 }
 
-void moveCharacter() {
+void moveCharacterr() {
   xpos = mouseX;
   ypos = mouseY;
   mainCharacter.MoveToward(xpos-mainCharacter.x, ypos - mainCharacter.y);
